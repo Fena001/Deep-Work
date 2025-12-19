@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"> 
+  
+  <title>Flow State Blocked</title>
+  <style>
+    body {
+      background-color: #0B1220;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    h1 { font-size: 3rem; margin-bottom: 10px; color: #22C55E; }
+    p { font-size: 1.2rem; color: #94A3B8; margin-bottom: 40px; }
+    .icon { font-size: 80px; margin-bottom: 20px; }
+    
+    button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: white;
+      background-color: #ef4444;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: 0.3s;
+    }
+    button:hover { opacity: 1; transform: scale(1.05); }
+  </style>
+</head>
+<body>
+  <div class="icon">🛡️</div>
+  
+  <h1>Focus Mode Active</h1>
+  <p>This site is blocked by your Flow State session.</p>
+  
+  <button id="overrideBtn">Emergency Unblock (1 min)</button>
+
+  <script src="blocked.js"></script>
+</body>
+</html>

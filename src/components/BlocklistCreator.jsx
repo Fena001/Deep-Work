@@ -1,161 +1,182 @@
 import React, { useState } from 'react';
-import { Shield, Plus, Check, HelpCircle } from 'lucide-react';
+import { Plus, Check, ArrowLeft, Trash2 } from 'lucide-react';
+import { COMMON_APPS, CATEGORY_GROUPS } from '../data/categories';
 
 const BlocklistCreator = ({ onSave, onCancel }) => {
   const [listName, setListName] = useState('');
-  const [selectedFilters, setSelectedFilters] = useState([]);
+  const [customUrl, setCustomUrl] = useState('');
+  const [customSites, setCustomSites] = useState([]);
   
-  // Custom sites state
-  const [customSite, setCustomSite] = useState('');
-  const [addedSites, setAddedSites] = useState([]); 
+  const [selectedApps, setSelectedApps] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
-  // --- FULL DATA SETS (Restored) ---
-  const commonFilters = [
-    'Amazon', 'Instagram', 'Reddit', 'Tumblr', 
-    'Apple News', 'LinkedIn', 'Slack', 'Twitter',
-    'Clubhouse', 'Mastodon', 'Snapchat', 'WhatsApp',
-    'Discord', 'Netflix', 'Spotify', 'YouTube',
-    'eBay', 'NY Times', 'Telegram', 'Facebook', 
-    'OkCupid', 'TikTok', 'Gmail', 'Pinterest', 'Tinder'
-  ];
-
-  const categoryFilters = [
-    'Social', 'News', 'Sports', 'Time Wasters',
-    'Meta', 'Politics', 'Blogs', 'Dating',
-    'Messaging', 'Shopping', 'Food Delivery', 'Gambling',
-    'Search Engines', 'TV/Video', 'Games', 'Adult'
-  ];
-
-  const toggleFilter = (filter) => {
-    if (selectedFilters.includes(filter)) {
-      setSelectedFilters(selectedFilters.filter(f => f !== filter));
+  const toggleApp = (id) => {
+    if (selectedApps.includes(id)) {
+      setSelectedApps(prev => prev.filter(item => item !== id));
     } else {
-      setSelectedFilters([...selectedFilters, filter]);
+      setSelectedApps(prev => [...prev, id]);
     }
   };
 
-  const handleAddSite = () => {
-    if (customSite.trim()) {
-      setAddedSites([...addedSites, customSite]);
-      setCustomSite('');
+  const toggleCategory = (id) => {
+    if (selectedCategories.includes(id)) {
+      setSelectedCategories(prev => prev.filter(item => item !== id));
+    } else {
+      setSelectedCategories(prev => [...prev, id]);
     }
   };
 
-  const handleCreate = () => {
-    if (!listName.trim()) {
-      alert("Please name your blocklist");
-      return;
-    }
-    const totalFilters = selectedFilters.length + addedSites.length;
-    const countText = `${totalFilters} filters selected`;
-    onSave(listName, countText);
+  const handleAddCustom = (e) => {
+    e.preventDefault();
+    if (!customUrl.trim()) return;
+    const clean = customUrl.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0];
+    if (!customSites.includes(clean)) setCustomSites([...customSites, clean]);
+    setCustomUrl('');
+  };
+
+  const handleSave = () => {
+    if (!listName.trim()) { alert("Please enter a list name."); return; }
+
+    let finalSites = [...customSites];
+
+    selectedApps.forEach(id => {
+      const app = COMMON_APPS.find(a => a.id === id);
+      if (app) finalSites.push(app.url);
+    });
+
+    selectedCategories.forEach(id => {
+      const cat = CATEGORY_GROUPS.find(c => c.id === id);
+      if (cat) finalSites = [...finalSites, ...cat.sites];
+    });
+
+    finalSites = [...new Set(finalSites)];
+
+    if (finalSites.length === 0) { alert("Select at least one distraction to block."); return; }
+
+    onSave(listName, `${finalSites.length} sites`, finalSites);
   };
 
   return (
-    <div className="w-full max-w-[1000px] animate-fade-in pb-12">
+    <div className="w-full max-w-4xl bg-[#0B1221] rounded-xl p-8 shadow-2xl animate-fade-in overflow-y-auto max-h-[90vh] text-white">
       
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6 bg-forest-panel p-4 rounded-t-xl border-b border-white/5">
-        <div className="flex items-center gap-3">
-          <Shield className="text-forest-muted" size={24} />
-          <h1 className="text-xl font-bold text-white">New Blocklist</h1>
-        </div>
-        <button onClick={onCancel} className="text-xs font-bold text-red-400 hover:text-white tracking-wider">
-          CANCEL
-        </button>
-      </div>
-
-      <div className="bg-forest-panel p-8 rounded-b-xl border border-white/5 shadow-lg">
-        
-        {/* Name Input */}
-        <input 
-          type="text" 
-          placeholder="Name your blocklist"
-          value={listName}
-          onChange={(e) => setListName(e.target.value)}
-          className="w-full bg-white text-forest-dark p-4 rounded text-lg font-medium mb-8 focus:outline-none focus:ring-4 focus:ring-forest-accent"
-        />
-
-        {/* Custom Sites Section */}
-        <div className="mb-10 bg-forest-dark/30 p-6 rounded-xl border border-white/5">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Your Custom Websites</h3>
-          <div className="flex gap-4 mb-4">
-            <input 
-              type="text" 
-              placeholder="e.g. cnn.com" 
-              value={customSite}
-              onChange={(e) => setCustomSite(e.target.value)}
-              className="flex-1 bg-white text-forest-dark p-3 rounded font-medium" 
-            />
-            <button 
-              onClick={handleAddSite}
-              className="bg-forest-accent hover:bg-forest-hover text-white font-bold px-6 rounded transition"
-            >
-              ADD SITE
+      <div className="flex items-center justify-between mb-8">
+         <div className="flex items-center gap-4">
+            <button onClick={onCancel} className="p-2 hover:bg-white/10 rounded-full transition">
+              <ArrowLeft size={24} className="text-gray-400" />
             </button>
-          </div>
-
-          <div className="space-y-2">
-            {addedSites.map((site, index) => (
-              <div key={index} className="flex items-center gap-2 text-white text-lg">
-                <div className="bg-white rounded-full p-0.5">
-                   <Check size={14} className="text-forest-dark" strokeWidth={4} /> 
-                </div>
-                {site}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* SECTION 1: Common Filters */}
-        <div className="mb-10">
-           <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Common Filters</h3>
-            <HelpCircle size={14} className="text-forest-muted" />
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-4">
-            {commonFilters.map(filter => (
-              <button key={filter} onClick={() => toggleFilter(filter)} className="flex items-center gap-3 group text-left">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors shrink-0 ${
-                  selectedFilters.includes(filter) ? 'bg-white' : 'bg-forest-accent'
-                }`}>
-                  {selectedFilters.includes(filter) ? <Check size={14} className="text-forest-dark" strokeWidth={4}/> : <Plus size={16} className="text-forest-dark"/>}
-                </div>
-                <span className="text-lg text-forest-text">{filter}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* SECTION 2: Category Filters (Added Back) */}
-        <div className="mb-8">
-           <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Category Filters</h3>
-            <HelpCircle size={14} className="text-forest-muted" />
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-4">
-            {categoryFilters.map(filter => (
-              <button key={filter} onClick={() => toggleFilter(filter)} className="flex items-center gap-3 group text-left">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors shrink-0 ${
-                  selectedFilters.includes(filter) ? 'bg-white' : 'bg-forest-accent'
-                }`}>
-                  {selectedFilters.includes(filter) ? <Check size={14} className="text-forest-dark" strokeWidth={4}/> : <Plus size={16} className="text-forest-dark"/>}
-                </div>
-                <span className="text-lg text-forest-text">{filter}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Create Button */}
-        <button 
-          onClick={handleCreate}
-          className="w-full bg-forest-accent hover:bg-forest-hover text-white text-xl font-bold py-4 rounded-lg mt-8 shadow-lg transition transform active:scale-[0.99]"
-        >
-          CREATE BLOCKLIST
-        </button>
-
+            <h2 className="text-2xl font-bold">New Blocklist</h2>
+         </div>
+         <button 
+           onClick={handleSave}
+           className="bg-green-500 hover:bg-green-600 text-white px-8 py-2 rounded font-bold transition shadow-lg hover:scale-105"
+         >
+           DONE
+         </button>
       </div>
+
+      <div className="mb-8">
+         <label className="block text-gray-400 text-xs font-bold uppercase mb-2">List Name</label>
+         <input 
+           type="text" 
+           value={listName}
+           onChange={(e) => setListName(e.target.value)}
+           placeholder="e.g. Work Mode"
+           className="w-full bg-[#161F32] text-white p-4 rounded border border-white/5 focus:outline-none focus:border-green-500 transition-colors"
+         />
+      </div>
+
+      <div className="mb-8">
+        <label className="block text-gray-400 text-xs font-bold uppercase mb-2">Your Custom Websites</label>
+        <form onSubmit={handleAddCustom} className="flex gap-2">
+          <input 
+            type="text" 
+            value={customUrl}
+            onChange={(e) => setCustomUrl(e.target.value)}
+            placeholder="e.g. specific-site.com"
+            className="flex-1 bg-[#161F32] text-white p-3 rounded border border-white/5 focus:outline-none focus:border-green-500"
+          />
+          <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-6 rounded font-bold transition-colors">ADD</button>
+        </form>
+        {customSites.length > 0 && (
+          <div className="flex flex-col gap-2 mt-3">
+             {customSites.map(s => (
+                <div key={s} className="bg-[#161F32] p-3 rounded flex justify-between items-center border border-white/5">
+                    <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-white text-[#0B1221] flex items-center justify-center">
+                            <Check size={14} strokeWidth={4}/>
+                        </div>
+                        <span className="font-medium text-white">{s}</span>
+                    </div>
+                    <button onClick={() => setCustomSites(prev => prev.filter(x => x !== s))} className="text-gray-500 hover:text-red-400">
+                        <Trash2 size={18} />
+                    </button>
+                </div>
+             ))}
+          </div>
+        )}
+      </div>
+
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+            <span className="text-gray-400 text-xs font-bold uppercase">Common Filters</span>
+            <span className="text-gray-600 text-xs cursor-help" title="Popular apps">?</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {COMMON_APPS.map(app => {
+                const isSelected = selectedApps.includes(app.id);
+                return (
+                    <div 
+                        key={app.id}
+                        onClick={() => toggleApp(app.id)}
+                        className="flex items-center gap-3 cursor-pointer group select-none"
+                    >
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${isSelected ? 'bg-white text-[#0B1221]' : 'bg-green-500 text-white group-hover:scale-110'}`}>
+                            {isSelected ? <Check size={14} strokeWidth={4}/> : <Plus size={14} strokeWidth={4}/>}
+                        </div>
+                        <span className={`font-medium transition-colors ${isSelected ? 'text-white' : 'text-gray-300 group-hover:text-white'}`}>
+                            {app.name}
+                        </span>
+                    </div>
+                );
+            })}
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+            <span className="text-gray-400 text-xs font-bold uppercase">Category Filters</span>
+            <span className="text-gray-600 text-xs cursor-help" title="Broad groups of sites">?</span>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {CATEGORY_GROUPS.map(cat => {
+                const isSelected = selectedCategories.includes(cat.id);
+                return (
+                    <div 
+                        key={cat.id}
+                        onClick={() => toggleCategory(cat.id)}
+                        className="flex items-center gap-3 cursor-pointer group select-none"
+                    >
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${isSelected ? 'bg-white text-[#0B1221]' : 'bg-green-500 text-white group-hover:scale-110'}`}>
+                            {isSelected ? <Check size={14} strokeWidth={4}/> : <Plus size={14} strokeWidth={4}/>}
+                        </div>
+                        <span className={`font-medium transition-colors ${isSelected ? 'text-white' : 'text-gray-300 group-hover:text-white'}`}>
+                            {cat.name}
+                        </span>
+                    </div>
+                );
+            })}
+        </div>
+      </div>
+
+      <div className="flex justify-center mt-8 pt-6 border-t border-white/10">
+         <button 
+           onClick={handleSave} 
+           className="bg-green-500 hover:bg-green-600 text-white px-20 py-3 rounded font-bold text-lg shadow-lg hover:scale-105 transition-all"
+         >
+            DONE
+         </button>
+      </div>
+
     </div>
   );
 };

@@ -33,7 +33,6 @@ const BlocklistManager = ({ lists, onEdit, onAdd, onRename, onDelete }) => {
 
   return (
     <div className="mt-8">
-      {/* Header Row */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-white">My Blocklists</h2>
         <button 
@@ -45,7 +44,6 @@ const BlocklistManager = ({ lists, onEdit, onAdd, onRename, onDelete }) => {
         </button>
       </div>
 
-      {/* The List Container */}
       <div className="bg-forest-panel rounded-xl border border-white/5 overflow-hidden">
         {lists.map((list, index) => (
           <div 
@@ -55,7 +53,6 @@ const BlocklistManager = ({ lists, onEdit, onAdd, onRename, onDelete }) => {
               ${index !== lists.length - 1 ? 'border-b border-white/5' : ''} 
             `}
           >
-            {/* Left Side: Icon & Name */}
             <div className="flex items-center gap-4 flex-1">
               <Shield className="text-forest-muted" size={24} />
               
@@ -83,7 +80,6 @@ const BlocklistManager = ({ lists, onEdit, onAdd, onRename, onDelete }) => {
               )}
             </div>
 
-            {/* Right Side: Actions */}
             {editingId !== list.id && (
               <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button 

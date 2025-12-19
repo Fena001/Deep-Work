@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Flow State",
+  "version": "1.0",
+  "description": "Focus Dashboard & Website Blocker",
+  
+
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+
+  "action": {
+    "default_popup": "index.html"
+  },
+
+  "permissions": [
+    "storage", 
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess", 
+    "alarms",
+    "notifications",
+    "offscreen"  
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
